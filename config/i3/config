@@ -25,9 +25,6 @@ bindsym $mod+h focus left
 bindsym $mod+j focus down
 bindsym $mod+k focus up
 bindsym $mod+l focus right
-bindsym $mod+Left focus left
-bindsym $mod+Up focus up
-bindsym $mod+Right focus right
 
 # Move windows
 bindsym $mod+Shift+h move left
@@ -207,3 +204,9 @@ exec_always --no-startup-id ~/.local/bin/ch-os-auto-new-ws
 # CH OS safe binds
 bindsym $mod+d exec --no-startup-id ~/.local/bin/appmenu
 bindsym $mod+Escape exec --no-startup-id ~/.local/bin/chos-power
+
+# CH OS: focus windows with Alt + arrows
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
