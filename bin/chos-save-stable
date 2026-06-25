@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+
+mkdir -p "$HOME/.config/chos/stable"
+
+i3 -C -c "$HOME/.config/i3/config"
+
+cp "$HOME/.config/i3/config" "$HOME/.config/chos/stable/i3.config.STABLE"
+cp "$HOME/.local/bin/appmenu" "$HOME/.config/chos/stable/appmenu.STABLE" 2>/dev/null || true
+cp "$HOME/.local/bin/chos-power" "$HOME/.config/chos/stable/chos-power.STABLE" 2>/dev/null || true
+cp "$HOME/.local/bin/ch-os-status" "$HOME/.config/chos/stable/ch-os-status.STABLE" 2>/dev/null || true
+cp "$HOME/.local/bin/chos-status" "$HOME/.config/chos/stable/chos-status.STABLE" 2>/dev/null || true
+cp "$HOME/.config/rofi/chos.rasi" "$HOME/.config/chos/stable/chos.rasi.STABLE" 2>/dev/null || true
+cp "$HOME/.config/rofi/chos-power.rasi" "$HOME/.config/chos/stable/chos-power.rasi.STABLE" 2>/dev/null || true
+cp "$HOME/.config/kitty/kitty.conf" "$HOME/.config/chos/stable/kitty.conf.STABLE" 2>/dev/null || true
+
+echo "CH OS stable point saved"

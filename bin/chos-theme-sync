@@ -1,0 +1,208 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "$HOME/.config/chos/colors.conf"
+
+ROFI_LAUNCHER="$HOME/.config/rofi/chos-launcher.rasi"
+ROFI_POWER="$HOME/.config/rofi/chos-power.rasi"
+ROFI_BASE="$HOME/.config/rofi/chos.rasi"
+KITTY_THEME="$HOME/.config/chos/themes/kitty.conf"
+
+cat > "$ROFI_LAUNCHER" <<EOROFI
+* {
+    bg: ${CH_BG};
+    panel: ${CH_PANEL};
+    panel2: ${CH_PANEL_2};
+    fg: ${CH_FG};
+    border: ${CH_BORDER};
+    border-dark: ${CH_BORDER_DARK};
+    selected: ${CH_SELECTED};
+    muted: ${CH_MUTED};
+}
+
+window {
+    width: 620px;
+    background-color: @bg;
+    border: 2px;
+    border-color: @border;
+    padding: 18px;
+    location: center;
+    anchor: center;
+}
+
+mainbox {
+    background-color: @panel;
+    border: 1px;
+    border-color: @muted;
+    padding: 14px;
+    spacing: 12px;
+}
+
+inputbar {
+    enabled: true;
+    background-color: @panel2;
+    border: 2px;
+    border-color: @border-dark;
+    padding: 10px;
+    children: [entry];
+}
+
+entry {
+    background-color: transparent;
+    text-color: @fg;
+    font: "${CH_FONT}";
+}
+
+listview {
+    background-color: @panel;
+    spacing: 8px;
+    lines: 10;
+    columns: 1;
+    fixed-height: false;
+}
+
+element {
+    background-color: @panel2;
+    border: 2px;
+    border-color: @border-dark;
+    padding: 9px;
+    spacing: 10px;
+}
+
+element normal.normal {
+    background-color: @panel2;
+    text-color: @fg;
+}
+
+element selected.normal {
+    background-color: @selected;
+    border-color: @border;
+    text-color: @fg;
+}
+
+element-icon {
+    background-color: transparent;
+    size: 24px;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: @fg;
+    font: "${CH_FONT}";
+    vertical-align: 0.5;
+}
+
+scrollbar {
+    enabled: false;
+}
+EOROFI
+
+cat > "$ROFI_POWER" <<EOROFI
+* {
+    bg: ${CH_BG};
+    panel: ${CH_PANEL};
+    panel2: ${CH_PANEL_2};
+    fg: ${CH_FG};
+    border: ${CH_BORDER};
+    border-dark: ${CH_BORDER_DARK};
+    selected: ${CH_SELECTED};
+    muted: ${CH_MUTED};
+}
+
+window {
+    width: 430px;
+    background-color: @bg;
+    border: 2px;
+    border-color: @border;
+    padding: 18px;
+    location: center;
+    anchor: center;
+}
+
+mainbox {
+    background-color: @panel;
+    border: 1px;
+    border-color: @muted;
+    padding: 14px;
+}
+
+inputbar {
+    enabled: false;
+}
+
+listview {
+    background-color: @panel;
+    spacing: 8px;
+    lines: 4;
+}
+
+element {
+    background-color: @panel2;
+    border: 2px;
+    border-color: @border-dark;
+    padding: 10px;
+}
+
+element normal.normal {
+    background-color: @panel2;
+    text-color: @fg;
+}
+
+element selected.normal {
+    background-color: @selected;
+    border-color: @border;
+    text-color: @fg;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: @fg;
+    horizontal-align: 0.5;
+    vertical-align: 0.5;
+    font: "${CH_FONT}";
+}
+
+scrollbar {
+    enabled: false;
+}
+EOROFI
+
+cp "$ROFI_LAUNCHER" "$ROFI_BASE"
+
+cat > "$KITTY_THEME" <<EOKITTY
+# CH OS kitty theme
+
+background ${CH_BG}
+foreground ${CH_FG}
+selection_background ${CH_SELECTED}
+selection_foreground ${CH_FG}
+
+cursor ${CH_FG}
+cursor_text_color ${CH_BG}
+
+active_border_color ${CH_BORDER}
+inactive_border_color ${CH_BORDER_DARK}
+bell_border_color ${CH_BORDER}
+
+color0 ${CH_BG}
+color1 ${CH_BORDER_DARK}
+color2 ${CH_BORDER}
+color3 ${CH_SELECTED}
+color4 ${CH_MUTED}
+color5 ${CH_BORDER_DARK}
+color6 ${CH_FG}
+color7 ${CH_FG}
+color8 ${CH_PANEL_2}
+color9 ${CH_BORDER_DARK}
+color10 ${CH_BORDER}
+color11 ${CH_SELECTED}
+color12 ${CH_MUTED}
+color13 ${CH_BORDER}
+color14 ${CH_FG}
+color15 ${CH_FG}
+
+font_family ${CH_MONO_FONT}
+font_size 10.0
+window_padding_width 8
+background_opacity 0.96
+EOKITTY

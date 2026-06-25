@@ -1,0 +1,114 @@
+#!/bin/bash
+
+echo '{"version":1}'
+echo '['
+echo '[],'
+
+CPU_USE=0
+CPU_TEMP=0
+GPU_USE="N/A"
+GPU_TEMP=0
+BAT="AC"
+BAT_NUM=100
+BAT_STATE=""
+LAST_HEAVY=0
+
+while true; do
+    NOW=$(date +%s)
+
+    RAM=$(free -h | awk '/Mem:/ {gsub("Gi","G",$3); print $3}')
+
+    MODE=$(cat /sys/firmware/acpi/platform_profile 2>/dev/null)
+    [ -z "$MODE" ] && MODE="unknown"
+
+    VOL=$(pactl get-sink-volume @DEFAULT_SINK@ | awk -F'/' 'NR==1 {gsub(/ /,"",$2); print $2}')
+    VOL_NUM=$(echo "$VOL" | tr -d '%')
+    [ -z "$VOL" ] && VOL="N/A"
+    [ -z "$VOL_NUM" ] && VOL_NUM=0
+
+    WIFI=$(iwgetid -r 2>/dev/null)
+    [ -z "$WIFI" ] && WIFI="LAN"
+
+    NET_NUM=$(cat /proc/net/wireless 2>/dev/null | awk 'NR==3 {print int($3 * 100 / 70)}')
+    [ -z "$NET_NUM" ] && NET_NUM=100
+    NET="${NET_NUM}%"
+
+    IP=$(ip route get 1.1.1.1 | awk '{print $7; exit}')
+    [ -z "$IP" ] && IP="NO-IP"
+
+    DATE=$(date "+%A %d")
+    TIME=$(date "+%H:%M:%S")
+
+    if [ $((NOW - LAST_HEAVY)) -ge 5 ]; then
+        CPU_USE=$(top -bn1 | awk '/Cpu/ {print int(100-$8)}')
+        CPU_TEMP=$(sensors 2>/dev/null | awk '/Package id 0|Tctl|temp1/ {gsub(/[+°C]/,"",$2); print int($2); exit}')
+        [ -z "$CPU_TEMP" ] && CPU_TEMP=0
+
+        GPU_USE=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1)
+        GPU_TEMP=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null | head -1)
+        [[ "$GPU_USE" =~ ^[0-9]+$ ]] || GPU_USE="N/A"
+        [[ "$GPU_TEMP" =~ ^[0-9]+$ ]] || GPU_TEMP=0
+
+        BAT_INFO=$(upower -i $(upower -e | grep BAT | head -1) 2>/dev/null)
+        BAT=$(echo "$BAT_INFO" | awk '/percentage/ {print $2}')
+        BAT_NUM=$(echo "$BAT" | tr -d '%')
+        BAT_STATE=$(echo "$BAT_INFO" | awk '/state/ {print $2}')
+        [ -z "$BAT" ] && BAT="AC"
+        [ -z "$BAT_NUM" ] && BAT_NUM=100
+
+        LAST_HEAVY=$NOW
+    fi
+
+    GREEN="#4DFFAA"
+    BRIGHT_GREEN="#00FF66"
+    CYAN="#55CCFF"
+    SOFT_CYAN="#7DF9FF"
+    PURPLE="#B388FF"
+    YELLOW="#FFD166"
+    ORANGE="#FFB347"
+    RED="#FF5555"
+    WHITE="#BFFFE8"
+    GRAY="#8FA3A3"
+    DARK="#050505"
+
+    CPU_COLOR="$CYAN"
+    [ "$CPU_TEMP" -ge 60 ] && CPU_COLOR="$ORANGE"
+    [ "$CPU_TEMP" -ge 80 ] && CPU_COLOR="$RED"
+
+    GPU_COLOR="$CYAN"
+    [ "$GPU_TEMP" -ge 60 ] && GPU_COLOR="$ORANGE"
+    [ "$GPU_TEMP" -ge 80 ] && GPU_COLOR="$RED"
+
+    WIFI_COLOR="$SOFT_CYAN"
+    [ "$NET_NUM" -lt 50 ] && WIFI_COLOR="$ORANGE"
+    [ "$NET_NUM" -lt 30 ] && WIFI_COLOR="$RED"
+
+    VOL_COLOR="$YELLOW"
+    [ "$VOL_NUM" -gt 100 ] && VOL_COLOR="$ORANGE"
+    [ "$VOL_NUM" -gt 150 ] && VOL_COLOR="$RED"
+
+    BAT_COLOR="$WHITE"
+    [ "$BAT_NUM" -lt 20 ] && BAT_COLOR="$RED"
+    [[ "$BAT_STATE" == "charging" ]] && BAT_COLOR="$BRIGHT_GREEN"
+
+    MODE_COLOR="$WHITE"
+    [[ "$MODE" == "quiet" ]] && MODE_COLOR="$CYAN"
+    [[ "$MODE" == "balanced" ]] && MODE_COLOR="$YELLOW"
+    [[ "$MODE" == "performance" ]] && MODE_COLOR="$RED"
+
+    echo "[\
+{\"full_text\":\" CHOS \",\"color\":\"$DARK\",\"background\":\"$GREEN\"},\
+{\"full_text\":\" $IP \",\"color\":\"$BRIGHT_GREEN\"},\
+{\"full_text\":\" RAM $RAM \",\"color\":\"$PURPLE\"},\
+{\"full_text\":\" CPU ${CPU_USE}% ${CPU_TEMP}°C \",\"color\":\"$CPU_COLOR\"},\
+{\"full_text\":\" GPU ${GPU_USE}% ${GPU_TEMP}°C \",\"color\":\"$GPU_COLOR\"},\
+{\"full_text\":\" $WIFI $NET \",\"color\":\"$WIFI_COLOR\"},\
+{\"full_text\":\" BAT $BAT \",\"color\":\"$BAT_COLOR\"},\
+{\"full_text\":\" VOL $VOL \",\"color\":\"$VOL_COLOR\"},\
+{\"full_text\":\" $MODE \",\"color\":\"$MODE_COLOR\"},\
+{\"full_text\":\" $DATE \",\"color\":\"$GREEN\"},\
+{\"full_text\":\" $TIME \",\"color\":\"$CYAN\"}\
+],"
+
+    sleep 0.2
+done

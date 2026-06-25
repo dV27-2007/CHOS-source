@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+CONFIG="$HOME/.config/i3/config"
+
+echo "Checking i3 config..."
+echo
+
+i3 -C -c "$CONFIG"
+echo
+
+echo "CH OS keybinds:"
+grep -nEi 'bindsym.*(\$mod\+d|mod1\+d|alt\+d|escape|chos-power|appmenu)|status_command' "$CONFIG" || true
+echo
+
+echo "Possible duplicate Escape binds:"
+grep -nEi 'bindsym.*escape|chos-power' "$CONFIG" || true

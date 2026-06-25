@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=CH OS Maintenance
+Comment=CH OS backup, restore and config maintenance
+Exec=/home/david/.local/bin/chos-maintenance
+Icon=preferences-system
+Terminal=false
+Categories=System;Settings;

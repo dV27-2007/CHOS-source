@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=CH OS Info
+Comment=CH OS system information panel
+Exec=/home/david/.local/bin/chos-info
+Icon=dialog-information
+Terminal=false
+Categories=System;Settings;

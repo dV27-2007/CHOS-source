@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+THEME="$HOME/.config/rofi/chos-info.rasi"
+BACKUPS="$HOME/.config/chos/backups"
+
+mkdir -p "$BACKUPS"
+
+show_latest_backups() {
+  {
+    printf '%-18s %s\n' "LATEST" "BACKUPS"
+    printf ' \n'
+    ls -t "$BACKUPS"/*.bak 2>/dev/null | head -n 14 | while read -r f; do
+      name="$(basename "$f")"
+      printf '%-18s %s\n' "BACKUP" "$name"
+    done
+    printf ' \n'
+    printf '%-18s %s\n' "PATH" "$BACKUPS"
+  } | rofi -dmenu -p "CH OS BACKUPS" -theme "$THEME" -no-custom >/dev/null
+}
+
+confirm_restore() {
+  confirm="$(printf 'No\nYes\n' | rofi -dmenu -p 'RESTORE I3 STABLE?' -theme "$HOME/.config/rofi/chos-power.rasi")"
+  [ "$confirm" = "Yes" ]
+}
+
+choice="$(
+  printf '%s\n' \
+    "Show Latest Backups" \
+    "Save Stable Point" \
+    "Check i3 Config" \
+    "Restore i3 Stable" \
+    "Open CH OS Config" \
+    "Open Backup Folder" \
+    "Cancel" |
+  rofi -dmenu -p "CH OS MAINTENANCE" -theme "$HOME/.config/rofi/chos.rasi"
+)"
+
+case "$choice" in
+  "Show Latest Backups")
+    show_latest_backups
+    ;;
+  "Save Stable Point")
+    "$HOME/.local/bin/chos-save-stable"
+    "$HOME/.local/bin/chos-info"
+    ;;
+  "Check i3 Config")
+    if i3 -C -c "$HOME/.config/i3/config" >/dev/null 2>&1; then
+      printf '%s\n' "STATUS      i3 config: OK" " " "CONFIG      ~/.config/i3/config" |
+        rofi -dmenu -p "CH OS CHECK" -theme "$THEME" -no-custom >/dev/null
+    else
+      printf '%s\n' "STATUS      i3 config: ERROR" " " "RUN         chos-check-i3" |
+        rofi -dmenu -p "CH OS CHECK" -theme "$THEME" -no-custom >/dev/null
+    fi
+    ;;
+  "Restore i3 Stable")
+    if confirm_restore; then
+      "$HOME/.local/bin/chos-restore-i3"
+    fi
+    ;;
+  "Open CH OS Config")
+    "$HOME/.local/bin/chos-open-config"
+    ;;
+  "Open Backup Folder")
+    if command -v kitty >/dev/null 2>&1 && command -v ranger >/dev/null 2>&1; then
+      kitty -e ranger "$BACKUPS"
+    else
+      xdg-open "$BACKUPS" >/dev/null 2>&1 || true
+    fi
+    ;;
+  "Cancel"|"")
+    exit 0
+    ;;
+esac

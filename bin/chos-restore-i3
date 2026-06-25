@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+if [ ! -f "$HOME/.config/chos/stable/i3.config.STABLE" ]; then
+  echo "No stable i3 backup found"
+  exit 1
+fi
+
+cp "$HOME/.config/i3/config" "$HOME/.config/chos/backups/config.BROKEN.$(date +%Y%m%d_%H%M%S).bak"
+cp "$HOME/.config/chos/stable/i3.config.STABLE" "$HOME/.config/i3/config"
+
+i3 -C -c "$HOME/.config/i3/config"
+i3-msg reload
+
+echo "i3 config restored from stable backup"

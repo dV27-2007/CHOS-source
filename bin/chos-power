@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+THEME="$HOME/.config/rofi/chos-power.rasi"
+source "$HOME/.config/chos/chos.conf" 2>/dev/null || true
+
+ask_confirm() {
+  local action="$1"
+
+  if [ "${CH_POWER_CONFIRM:-yes}" != "yes" ]; then
+    return 0
+  fi
+
+  local confirm
+  confirm="$(printf "No\nYes\n" | rofi -dmenu -p "$action?" -theme "$THEME")"
+
+  [ "$confirm" = "Yes" ]
+}
+
+choice="$(printf "Shutdown\nReboot\nLogout\nCancel\n" | rofi -dmenu -p "POWER" -theme "$THEME")"
+
+case "$choice" in
+  Shutdown)
+    ask_confirm "Shutdown" && systemctl poweroff
+    ;;
+  Reboot)
+    ask_confirm "Reboot" && systemctl reboot
+    ;;
+  Logout)
+    ask_confirm "Logout" && i3-msg exit
+    ;;
+  Cancel|"")
+    exit 0
+    ;;
+esac

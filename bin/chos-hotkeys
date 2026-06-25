@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+THEME="$HOME/.config/rofi/chos-info.rasi"
+
+row() {
+  printf '%-15s %s\n' "$1" "$2"
+}
+
+sep() {
+  printf ' \n'
+}
+
+{
+  row "ALT+D"         "Application Launcher"
+  row "ALT+ESC"       "Power Menu"
+  row "ALT+ENTER"     "Terminal"
+  row "ALT+TAB"       "Next Window"
+  row "ALT+SHIFT+TAB" "Previous Window"
+  sep
+
+  row "F7"            "Brightness Down"
+  row "F8"            "Brightness Up"
+  sep
+
+  row "CHOS-INFO"     "System Info Panel"
+  row "CHOS-CONTROL"  "Control Center"
+  row "CHOS-CHECK-I3" "Check i3 Config"
+  row "CHOS-SAVE"     "Save Stable Point"
+  row "CHOS-RESTORE"  "Restore i3 Stable"
+  sep
+
+  row "CONFIG"        "~/.config/chos"
+  row "I3"            "~/.config/i3/config"
+  row "ROFI"          "~/.config/rofi/chos.rasi"
+  row "BAR"           "~/.local/bin/ch-os-status"
+  row "POWER"         "~/.local/bin/chos-power"
+} | rofi \
+      -dmenu \
+      -p "CH OS HOTKEYS" \
+      -theme "$THEME" \
+      -no-custom \
+      -selected-row 0 >/dev/null

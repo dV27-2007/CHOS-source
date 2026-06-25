@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=CH OS Control
+Comment=CH OS control center
+Exec=/home/david/.local/bin/chos-control
+Icon=preferences-system
+Terminal=false
+Categories=System;Settings;

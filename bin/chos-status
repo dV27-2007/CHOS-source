@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+source "$HOME/.config/chos/chos.conf" 2>/dev/null || true
+
+interval="${CH_STATUS_INTERVAL:-2}"
+prev_total=0
+prev_idle=0
+
+while true; do
+  read -r _ user nice system idle iowait irq softirq steal _ _ < /proc/stat
+
+  idle_all=$((idle + iowait))
+  non_idle=$((user + nice + system + irq + softirq + steal))
+  total=$((idle_all + non_idle))
+
+  total_diff=$((total - prev_total))
+  idle_diff=$((idle_all - prev_idle))
+
+  if [ "$total_diff" -gt 0 ]; then
+    cpu_usage=$((100 * (total_diff - idle_diff) / total_diff))
+  else
+    cpu_usage=0
+  fi
+
+  prev_total=$total
+  prev_idle=$idle_all
+
+  ram="$(free -h | awk '/Mem:/ {print $3}')"
+
+  bat="AC"
+  if [ -d /sys/class/power_supply/BAT0 ]; then
+    bat="$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null)%"
+  fi
+
+  net="$(iwgetid -r 2>/dev/null || true)"
+  [ -z "$net" ] && net="LAN"
+
+  gpu="N/A"
+  if command -v nvidia-smi >/dev/null 2>&1; then
+    gpu="$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -n1)%"
+    [ "$gpu" = "%" ] && gpu="N/A"
+  fi
+
+  fan="N/A"
+  fan_path="$(find /sys/class/hwmon -name 'fan1_input' 2>/dev/null | head -n1 || true)"
+  if [ -n "$fan_path" ]; then
+    fan="$(cat "$fan_path" 2>/dev/null) RPM"
+  fi
+
+  day="$(date '+%A %d')"
+  time_now="$(date '+%H:%M')"
+
+  echo "CH OS | RAM $ram | CPU ${cpu_usage}% | GPU $gpu | NET $net | BAT $bat | FAN $fan | $day | $time_now"
+
+  sleep "$interval"
+done

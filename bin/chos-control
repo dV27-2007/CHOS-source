@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+THEME="$HOME/.config/rofi/chos.rasi"
+
+open_hold() {
+  kitty --hold -e sh -lc "$1"
+}
+
+choice="$(
+  printf '%s\n' \
+    "CH OS Info" \
+    "CH OS Hotkeys" \
+    "CH OS Maintenance" \
+    "Check i3 Config" \
+    "Show Backups" \
+    "Open CH OS Config" \
+    "Save Stable Point" \
+    "Restore i3 Stable" \
+    "Reload i3" \
+    "Reload Rofi Theme" \
+    "Open Ranger" \
+    "Open Btop" \
+    "Cancel" |
+  rofi -dmenu -p "CH OS CONTROL" -theme "$THEME"
+)"
+
+case "$choice" in
+  "CH OS Info")
+    "$HOME/.local/bin/chos-info"
+    ;;
+  "CH OS Hotkeys")
+    "$HOME/.local/bin/chos-hotkeys"
+    ;;
+  "CH OS Maintenance")
+    "$HOME/.local/bin/chos-maintenance"
+    ;;
+  "Check i3 Config")
+    open_hold "$HOME/.local/bin/chos-check-i3"
+    ;;
+  "Show Backups")
+    open_hold "$HOME/.local/bin/chos-backups"
+    ;;
+  "Open CH OS Config")
+    "$HOME/.local/bin/chos-open-config"
+    ;;
+  "Save Stable Point")
+    open_hold "$HOME/.local/bin/chos-save-stable"
+    ;;
+  "Restore i3 Stable")
+    confirm="$(printf 'No\nYes\n' | rofi -dmenu -p 'Restore i3?' -theme "$THEME")"
+    [ "$confirm" = "Yes" ] && "$HOME/.local/bin/chos-restore-i3"
+    ;;
+  "Reload i3")
+    i3-msg reload
+    ;;
+  "Reload Rofi Theme")
+    "$HOME/.local/bin/chos-theme-sync" 2>/dev/null || true
+    i3-msg reload
+    ;;
+  "Open Ranger")
+    kitty -e ranger
+    ;;
+  "Open Btop")
+    kitty -e btop
+    ;;
+  "Cancel"|"")
+    exit 0
+    ;;
+esac

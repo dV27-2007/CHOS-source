@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+mkdir -p "$HOME/.config/chos"
+
+if command -v kitty >/dev/null 2>&1 && command -v ranger >/dev/null 2>&1; then
+  exec kitty -e ranger "$HOME/.config/chos"
+fi
+
+if command -v kitty >/dev/null 2>&1; then
+  exec kitty -e sh -c "cd '$HOME/.config/chos' && exec ${SHELL:-sh}"
+fi
+
+cd "$HOME/.config/chos" || exit 1
+exec "${SHELL:-sh}"

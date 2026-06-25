@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=CH OS Hotkeys
+Comment=CH OS keyboard shortcuts and commands
+Exec=/home/david/.local/bin/chos-hotkeys
+Icon=input-keyboard
+Terminal=false
+Categories=System;Settings;

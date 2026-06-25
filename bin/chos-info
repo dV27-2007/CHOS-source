@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+THEME="$HOME/.config/rofi/chos-info.rasi"
+
+os="$(. /etc/os-release && echo "$PRETTY_NAME")"
+kernel="$(uname -r)"
+uptime_text="$(uptime -p)"
+host="$(hostname)"
+session="${XDG_SESSION_TYPE:-unknown}"
+now="$(date '+%A %d  |  %H:%M')"
+
+cpu="$(lscpu | awk -F: '/Model name/ {gsub(/^ +/, "", $2); print $2; exit}')"
+cpu="$(printf '%s' "$cpu" | cut -c1-44)"
+ram="$(free -h | awk '/Mem:/ {print $3 " / " $2}')"
+
+gpu="N/A"
+if command -v nvidia-smi >/dev/null 2>&1; then
+  gpu="$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -n1 | cut -c1-44)"
+fi
+
+bat="AC"
+if [ -d /sys/class/power_supply/BAT0 ]; then
+  bat="$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null)%"
+fi
+
+net="$(iwgetid -r 2>/dev/null || true)"
+[ -z "$net" ] && net="LAN"
+
+i3_state="OK"
+if ! i3 -C -c "$HOME/.config/i3/config" >/dev/null 2>&1; then
+  i3_state="ERROR"
+fi
+
+row() {
+  printf '%-12s %s\n' "$1" "$2"
+}
+
+sep() {
+  printf ' \n'
+}
+
+{
+  row "STATUS"   "i3 config: $i3_state"
+  row "SESSION"  "$session"
+  row "TIME"     "$now"
+  sep
+
+  row "SYSTEM"   "$os"
+  row "KERNEL"   "$kernel"
+  row "UPTIME"   "$uptime_text"
+  sep
+
+  row "CPU"      "$cpu"
+  row "RAM"      "$ram"
+  row "GPU"      "$gpu"
+  row "BATTERY"  "$bat"
+  row "NETWORK"  "$net"
+  sep
+
+  row "ALT+D"    "Application Launcher"
+  row "ALT+ESC"  "Power Menu"
+  row "ALT+ENTER" "Terminal"
+  row "ALT+TAB"  "Next Window"
+  sep
+
+  row "CONFIG"   "~/.config/chos"
+} | rofi \
+      -dmenu \
+      -p "CH OS INFO" \
+      -theme "$THEME" \
+      -no-custom \
+      -selected-row 0 >/dev/null

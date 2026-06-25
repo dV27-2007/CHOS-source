@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+THEME="$HOME/.config/rofi/chos.rasi"
+
+exec rofi \
+  -show drun \
+  -modi drun,run \
+  -theme "$THEME" \
+  -matching fuzzy \
+  -sort \
+  -drun-display-format "{name}" \
+  -display-drun "" \
+  -p ""
