@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+import i3ipc
+
+i3 = i3ipc.Connection()
+
+def get_next_workspace():
+    nums = []
+    for ws in i3.get_workspaces():
+        if ws.num and ws.num > 0:
+            nums.append(ws.num)
+
+    if not nums:
+        return 1
+
+    return max(nums) + 1
+
+def on_window_new(i3, event):
+    con = event.container
+
+    # Игнорируем не настоящие окна: dock, splash, toolbar и т.п.
+    if not con.window:
+        return
+
+    # Игнорируем диалоги, popup, save/open windows.
+    # Иначе каждый маленький popup тоже будет улетать на новый workspace.
+    if con.window_type and con.window_type != "normal":
+        return
+
+    next_ws = get_next_workspace()
+
+    con.command(f"move container to workspace number {next_ws}")
+    i3.command(f"workspace number {next_ws}")
+
+i3.on("window::new", on_window_new)
+i3.main()

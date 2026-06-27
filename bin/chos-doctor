@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+ok() { printf "[OK]   %s\n" "$1"; }
+bad() { printf "[BAD]  %s\n" "$1"; }
+info() { printf "[INFO] %s\n" "$1"; }
+
+check_cmd() {
+  if command -v "$1" >/dev/null 2>&1; then
+    ok "$1: $(command -v "$1")"
+  else
+    bad "$1 not found"
+  fi
+}
+
+echo "CH OS doctor"
+echo
+
+check_cmd i3
+check_cmd i3-msg
+check_cmd rofi
+check_cmd kitty
+check_cmd ranger
+check_cmd awk
+check_cmd free
+
+if command -v nvidia-smi >/dev/null 2>&1; then
+  ok "nvidia-smi works"
+else
+  info "nvidia-smi not found or NVIDIA driver unavailable"
+fi
+
+echo
+
+for file in \
+  "$HOME/.config/chos/colors.conf" \
+  "$HOME/.config/chos/chos.conf" \
+  "$HOME/.config/rofi/chos-launcher.rasi" \
+  "$HOME/.config/rofi/chos-power.rasi" \
+  "$HOME/.local/bin/chos-launcher" \
+  "$HOME/.local/bin/chos-power" \
+  "$HOME/.local/bin/chos-status"
+do
+  if [ -e "$file" ]; then
+    ok "$file"
+  else
+    bad "$file missing"
+  fi
+done
+
+echo
+info "Alt+D should use: ~/.local/bin/appmenu or ~/.local/bin/chos-launcher"
+info "Power menu should use: ~/.local/bin/chos-power"
+info "Status should use: ~/.local/bin/ch-os-status or ~/.local/bin/chos-status"

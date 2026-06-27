@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+import curses, os, sys, time, math, random
+
+MODE = sys.argv[1] if len(sys.argv) > 1 else "apps"
+
+APPS = [
+    ("Terminal", "kitty"),
+    ("Firefox", "firefox"),
+    ("Telegram", "~/.local/share/Telegram/Telegram"),
+    ("VS Code", "code --password-store=basic"),
+    ("Files", "kitty ranger"),
+    ("Minecraft", "cd /usr/games/tlauncher && /usr/games/tlauncher/lib/jvm/jre/bin/java -Dfile.encoding=UTF8 -jar /usr/games/tlauncher/starter-core.jar"),
+    ("Btop", "kitty btop"),
+]
+
+POWER = [
+    ("Cancel", ""),
+    ("Logout", "i3-msg exit"),
+    ("Reboot", "systemctl reboot"),
+    ("Shutdown", "systemctl poweroff"),
+]
+
+STARS = []
+
+def safe_add(stdscr, y, x, text, attr=0):
+    h, w = stdscr.getmaxyx()
+    if 0 <= y < h and 0 <= x < w:
+        try:
+            stdscr.addstr(y, x, text[:max(0, w-x-1)], attr)
+        except curses.error:
+            pass
+
+def center(stdscr, y, text, color=1, bold=False):
+    _, w = stdscr.getmaxyx()
+    attr = curses.color_pair(color)
+    if bold:
+        attr |= curses.A_BOLD
+    safe_add(stdscr, y, max(0, (w-len(text))//2), text, attr)
+
+def init_stars(stdscr):
+    global STARS
+    h, w = stdscr.getmaxyx()
+    STARS = []
+    for _ in range(max(60, (h*w)//130)):
+        STARS.append({
+            "x": random.randint(1, max(2, w-2)),
+            "y": random.randint(2, max(3, h-3)),
+            "char": random.choice([".", "·", "*"]),
+            "tone": random.choice([1, 6, 8, 10]),
+            "phase": random.random() * math.tau,
+        })
+
+def draw_bg(stdscr, t):
+    if not STARS:
+        init_stars(stdscr)
+    for s in STARS:
+        glow = (math.sin(t + s["phase"]) + 1) / 2
+        attr = curses.color_pair(s["tone"])
+        if glow > 0.65:
+            attr |= curses.A_BOLD
+        safe_add(stdscr, s["y"], s["x"], s["char"], attr)
+
+def neon_box(stdscr, y, x, w, h, title):
+    attr = curses.color_pair(6) | curses.A_BOLD
+    glow = curses.color_pair(10)
+    safe_add(stdscr, y-1, x+3, "░" * max(0, w-6), glow)
+    safe_add(stdscr, y+h, x+3, "░" * max(0, w-6), glow)
+    safe_add(stdscr, y, x, "╔" + "═"*(w-2) + "╗", attr)
+    for i in range(1, h-1):
+        safe_add(stdscr, y+i, x, "║" + " "*(w-2) + "║", attr)
+    safe_add(stdscr, y+h-1, x, "╚" + "═"*(w-2) + "╝", attr)
+    center(stdscr, y+1, title, 3, True)
+
+def run(cmd):
+    if not cmd:
+        return
+    curses.endwin()
+    os.system(cmd + " &")
+
+def menu(stdscr):
+    curses.curs_set(0)
+    stdscr.keypad(True)
+    stdscr.timeout(120)
+
+    items = APPS if MODE == "apps" else POWER
+    title = "CH OS APPS" if MODE == "apps" else "CH OS POWER"
+    selected = 0
+
+    while True:
+        stdscr.clear()
+        h, w = stdscr.getmaxyx()
+        t = time.time()
+
+        draw_bg(stdscr, t)
+
+        bw, bh = 64, 20
+        y, x = max(1, (h-bh)//2), max(1, (w-bw)//2)
+
+        neon_box(stdscr, y, x, bw, bh, title)
+        center(stdscr, y+3, "Use ↑ ↓ and Enter", 3)
+
+        for i, (name, _) in enumerate(items):
+            yy = y + 6 + i*2
+            if i == selected:
+                safe_add(stdscr, yy, x+14, f"❯ {name} ❮", curses.color_pair(11) | curses.A_BOLD)
+            else:
+                safe_add(stdscr, yy, x+16, name, curses.color_pair(1))
+
+        stdscr.refresh()
+        key = stdscr.getch()
+
+        if key == -1:
+            continue
+        if key == 27:
+            break
+        if key == curses.KEY_UP:
+            selected = (selected - 1) % len(items)
+        elif key == curses.KEY_DOWN:
+            selected = (selected + 1) % len(items)
+        elif key in (10, 13):
+            name, cmd = items[selected]
+            if name == "Cancel":
+                break
+            run(cmd)
+            break
+
+def main(stdscr):
+    curses.start_color()
+    curses.use_default_colors()
+
+    if curses.COLORS >= 256:
+        curses.init_pair(1, 159, -1)
+        curses.init_pair(3, 228, -1)
+        curses.init_pair(6, 45, -1)
+        curses.init_pair(8, 22, -1)
+        curses.init_pair(10, 82, -1)
+        curses.init_pair(11, 190, -1)
+    else:
+        curses.init_pair(1, curses.COLOR_CYAN, -1)
+        curses.init_pair(3, curses.COLOR_YELLOW, -1)
+        curses.init_pair(6, curses.COLOR_CYAN, -1)
+        curses.init_pair(8, curses.COLOR_GREEN, -1)
+        curses.init_pair(10, curses.COLOR_GREEN, -1)
+        curses.init_pair(11, curses.COLOR_GREEN, -1)
+
+    curses.noecho()
+    curses.cbreak()
+    init_stars(stdscr)
+    menu(stdscr)
+
+if __name__ == "__main__":
+    curses.wrapper(main)

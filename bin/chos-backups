@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+BACKUPS="$HOME/.config/chos/backups"
+
+mkdir -p "$BACKUPS"
+
+echo "CH OS BACKUPS"
+echo "============="
+echo
+
+if ! ls "$BACKUPS"/*.bak >/dev/null 2>&1; then
+  echo "No backups found"
+  exit 0
+fi
+
+ls -lt "$BACKUPS"/*.bak | awk '{print $6, $7, $8, $9}'

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+CURRENT=$(cat /sys/firmware/acpi/platform_profile)
+
+case "$CURRENT" in
+    quiet)
+        echo balanced | sudo tee /sys/firmware/acpi/platform_profile >/dev/null
+        ;;
+    balanced)
+        echo performance | sudo tee /sys/firmware/acpi/platform_profile >/dev/null
+        ;;
+    performance)
+        echo quiet | sudo tee /sys/firmware/acpi/platform_profile >/dev/null
+        ;;
+esac

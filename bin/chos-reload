@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+"$HOME/.local/bin/chos-theme-sync"
+
+if command -v i3-msg >/dev/null 2>&1; then
+  i3-msg reload >/dev/null
+fi
+
+echo "CH OS reloaded"
