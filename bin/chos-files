@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec python3 "$HOME/Desktop/CHOS-source/apps/chos-files/src/chos_files.py" "$@"

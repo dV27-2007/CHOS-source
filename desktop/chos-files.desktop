@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=CHOS Files
+Comment=Official CHOS file manager
+Exec=chos-files
+Terminal=false
+Categories=System;FileManager;Utility;
