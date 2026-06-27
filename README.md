@@ -7,7 +7,7 @@ Stack:
 - i3wm
 - kitty
 - rofi
-- ranger
+- CHOS Files
 - custom ch-os-status bar
 
 Style:
