@@ -2,6 +2,7 @@
 Type=Application
 Name=CHOS Files
 Comment=Official CHOS file manager
-Exec=chos-files
+Exec=/home/david/.local/bin/chos-files %F
 Terminal=false
 Categories=System;FileManager;Utility;
+Keywords=files;folders;manager;chos;

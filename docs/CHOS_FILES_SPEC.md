@@ -37,10 +37,10 @@ MVP features:
 - left sidebar
 - current path bar
 - file/folder list
+- current-directory search filter
 - open folders
 - open files with xdg-open
 - back
-- forward
 - up
 - refresh
 - copy
@@ -50,6 +50,7 @@ MVP features:
 - new folder
 - new file
 - move to trash
+- safe overwrite confirmation before replace
 - show hidden files
 - keyboard shortcuts
 - right click context menu
@@ -58,10 +59,33 @@ MVP features:
 
 Delete must use trash, not permanent rm.
 
+Replacing an existing file or folder must ask for confirmation and move the previous target to trash before the replacement happens.
+
+## Current keyboard shortcuts
+
+- `Up` / `Down`: move selection in the file list
+- `Enter`: open selected file or folder
+- `BackSpace`: go to the parent directory when focus is not inside a text field
+- `Ctrl+F`: focus the search field and select its text
+- `Ctrl+L`: focus the path field and select its text
+- `Escape`: clear search, otherwise focus the file list
+- `F5`: refresh the current directory
+- `Delete`: move the selected item to trash
+- `Ctrl+C`: copy the selected file or folder
+- `Ctrl+X`: cut the selected file or folder
+- `Ctrl+V`: paste into the current directory
+- `Ctrl+H`: show or hide hidden files
+
 ## Default command
 
 ```bash
 chos-files
+```
+
+Desktop launch also needs to work through:
+
+```bash
+gtk-launch chos-files
 ```
 
 ## Config path
